@@ -68,7 +68,8 @@ class myCloudSet
     // Private data
 
         //- Sampling points
-        pointField sampleCoords_;
+        scalarField sampleCoords_;
+        word zoneName_;
 
 
     // Private Member Functions
@@ -96,14 +97,14 @@ public:
     // Constructors
 
         //- Construct from components
-        myCloudSet
+/*         myCloudSet
         (
             const word& name,
             const polyMesh& mesh,
             const meshSearch& searchEngine,
             const word& axis,
             const List<point>& sampleCoords
-        );
+        ); */
 
         //- Construct from dictionary
         myCloudSet
@@ -112,6 +113,7 @@ public:
             const polyMesh& mesh,
             const meshSearch& searchEngine,
             const dictionary& dict
+
         );
 
 

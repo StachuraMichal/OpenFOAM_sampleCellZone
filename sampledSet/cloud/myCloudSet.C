@@ -34,6 +34,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "word.H"
 #include "DynamicField.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -55,87 +56,29 @@ void Foam::myCloudSet::calcSamples
     DynamicList<scalar>& samplingCurveDist
 ) const
 {
-    const meshSearch& queryMesh = searchEngine();
+    const cellZoneMesh& zn = mesh().cellZones();
+    DynamicList<label>  foundProc;
+     const vectorField& my_cellC = mesh().cellCentres();
 
-    labelList foundProc(sampleCoords_.size(), -1);
-    forAll(sampleCoords_, sampleI)
+    forAll(zn, sampleI)
     {
-        label celli = queryMesh.findCell(sampleCoords_[sampleI]);
+        if  (zn[sampleI].name() == zoneName_ )
+        {   
+            const cellZone& myzone  = zn[sampleI];
+            
+            forAll(myzone, i)
+            {     
+                samplingPts.append(point(my_cellC[myzone[i]]));
+                samplingCells.append(myzone[i]);
+                samplingFaces.append(-1);
+                samplingSegments.append(0);
+                samplingCurveDist.append(1.0 * i);
 
-        if (celli != -1)
-        {
-            samplingPts.append(sampleCoords_[sampleI]);
-            samplingCells.append(celli);
-            samplingFaces.append(-1);
-            samplingSegments.append(0);
-            samplingCurveDist.append(1.0 * sampleI);
-
-            foundProc[sampleI] = Pstream::myProcNo();
+                foundProc.append(Pstream::myProcNo()); 
+            }
+                
         }
-    }
-
-    // Check that all have been found
-    labelList maxFoundProc(foundProc);
-    Pstream::listCombineGather(maxFoundProc, maxEqOp<label>());
-    Pstream::listCombineScatter(maxFoundProc);
-
-    labelList minFoundProc(foundProc.size(), labelMax);
-    forAll(foundProc, i)
-    {
-        if (foundProc[i] != -1)
-        {
-            minFoundProc[i] = foundProc[i];
-        }
-    }
-    Pstream::listCombineGather(minFoundProc, minEqOp<label>());
-    Pstream::listCombineScatter(minFoundProc);
-
-
-    DynamicField<point> missingPoints(sampleCoords_.size());
-
-    forAll(sampleCoords_, sampleI)
-    {
-        if (maxFoundProc[sampleI] == -1)
-        {
-            // No processor has found the location.
-            missingPoints.append(sampleCoords_[sampleI]);
-        }
-        else if (minFoundProc[sampleI] != maxFoundProc[sampleI])
-        {
-            WarningInFunction
-                << "For sample set " << name()
-                << " location " << sampleCoords_[sampleI]
-                << " seems to be on multiple domains: "
-                << minFoundProc[sampleI] << " and " << maxFoundProc[sampleI]
-                << nl
-                << "This might happen if the location is on"
-                << " a processor patch. Change the location slightly"
-                << " to prevent this." << endl;
-        }
-    }
-
-
-    if (missingPoints.size() > 0)
-    {
-        if (missingPoints.size() < 100 || debug)
-        {
-            WarningInFunction
-                << "For sample set " << name()
-                << " did not found " << missingPoints.size()
-                << " points out of " << sampleCoords_.size()
-                << nl
-                << "Missing points:" << missingPoints << endl;
-        }
-        else
-        {
-            WarningInFunction
-                << "For sample set " << name()
-                << " did not found " << missingPoints.size()
-                << " points out of " << sampleCoords_.size()
-                << nl
-                << "Print missing points by setting the debug flag"
-                << " for " << myCloudSet::typeName << endl;
-        }
+        
     }
 }
 
@@ -183,21 +126,6 @@ void Foam::myCloudSet::genSamples()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::myCloudSet::myCloudSet
-(
-    const word& name,
-    const polyMesh& mesh,
-    const meshSearch& searchEngine,
-    const word& axis,
-    const List<point>& sampleCoords
-)
-:
-    mySampledSet(name, mesh, searchEngine, axis),
-    sampleCoords_(sampleCoords)
-{
-    genSamples();
-}
-
 
 Foam::myCloudSet::myCloudSet
 (
@@ -208,7 +136,8 @@ Foam::myCloudSet::myCloudSet
 )
 :
     mySampledSet(name, mesh, searchEngine, dict),
-    sampleCoords_(dict.get<pointField>("points"))
+    sampleCoords_(dict.get<scalarField>("points")),
+    zoneName_(dict.get<word>("cellZone"))
 {
     genSamples();
 }
