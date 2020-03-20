@@ -1,7 +1,5 @@
 
-sampledSet/cloud/myCloudSet.C
-sampledSet/sampledSet/mySampledSet.C
-sampledSet/sampledSets/mySampledSets.C
-sampledSet/sampledSets/sampledSetsGrouping.C
+cellZoneSet/cellZoneSet.C
 
-LIB = $(FOAM_USER_LIBBIN)/libmycloud
+
+LIB = $(FOAM_USER_LIBBIN)/libsampleCellZone

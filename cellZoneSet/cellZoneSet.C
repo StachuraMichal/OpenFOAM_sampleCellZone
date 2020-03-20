@@ -26,8 +26,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "myCloudSet.H"
-#include "mySampledSet.H"
+#include "cellZoneSet.H"
+#include "sampledSet.H"
 #include "meshSearch.H"
 #include "DynamicList.H"
 #include "polyMesh.H"
@@ -40,14 +40,14 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(myCloudSet, 0);
-    addToRunTimeSelectionTable(mySampledSet, myCloudSet, word);
+    defineTypeNameAndDebug(cellZoneSet, 0);
+    addToRunTimeSelectionTable(sampledSet, cellZoneSet, word);
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::myCloudSet::calcSamples
+void Foam::cellZoneSet::calcSamples
 (
     DynamicList<point>& samplingPts,
     DynamicList<label>& samplingCells,
@@ -83,7 +83,7 @@ void Foam::myCloudSet::calcSamples
 }
 
 
-void Foam::myCloudSet::genSamples()
+void Foam::cellZoneSet::genSamples()
 {
     // Storage for sample points
     DynamicList<point> samplingPts;
@@ -127,7 +127,7 @@ void Foam::myCloudSet::genSamples()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 
-Foam::myCloudSet::myCloudSet
+Foam::cellZoneSet::cellZoneSet
 (
     const word& name,
     const polyMesh& mesh,
@@ -135,8 +135,7 @@ Foam::myCloudSet::myCloudSet
     const dictionary& dict
 )
 :
-    mySampledSet(name, mesh, searchEngine, dict),
-    sampleCoords_(dict.get<scalarField>("points")),
+    sampledSet(name, mesh, searchEngine, dict),
     zoneName_(dict.get<word>("cellZone"))
 {
     genSamples();

@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::myCloudSet
+    Foam::cellZoneSet
 
 Description
     Samples at arbitrary locations with a volume mesh.
@@ -38,14 +38,14 @@ Description
     \endtable
 
 SourceFiles
-    myCloudSet.C
+    cellZoneSet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef myCloudSet_H
-#define myCloudSet_H
+#ifndef cellZoneSet_H
+#define cellZoneSet_H
 
-#include "mySampledSet.H"
+#include "sampledSet.H"
 #include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,17 +58,16 @@ class passiveParticle;
 template<class Type> class particle;
 
 /*---------------------------------------------------------------------------*\
-                          Class myCloudSet Declaration
+                          Class cellZoneSet Declaration
 \*---------------------------------------------------------------------------*/
 
-class myCloudSet
+class cellZoneSet
 :
-    public mySampledSet
+    public sampledSet
 {
     // Private data
 
         //- Sampling points
-        scalarField sampleCoords_;
         word zoneName_;
 
 
@@ -91,13 +90,13 @@ class myCloudSet
 public:
 
     //- Runtime type information
-    TypeName("cloud");
+    TypeName("cellZone");
 
 
     // Constructors
 
         //- Construct from components
-/*         myCloudSet
+/*         cellZoneSet
         (
             const word& name,
             const polyMesh& mesh,
@@ -107,7 +106,7 @@ public:
         ); */
 
         //- Construct from dictionary
-        myCloudSet
+        cellZoneSet
         (
             const word& name,
             const polyMesh& mesh,
@@ -118,7 +117,7 @@ public:
 
 
     //- Destructor
-    virtual ~myCloudSet() = default;
+    virtual ~cellZoneSet() = default;
 };
 
 
